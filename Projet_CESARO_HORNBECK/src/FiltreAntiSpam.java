@@ -3,7 +3,7 @@ import java.io.*;
 import static java.lang.Integer.parseInt;
 
 public class FiltreAntiSpam {
-    static int TAILLE_DICO = 1000;
+    static int TAILLE_DICO = 853; //1000 - 147 mots de 3 lettres ou moins
 
 
     /**
@@ -18,10 +18,15 @@ public class FiltreAntiSpam {
         BufferedReader buffer = new BufferedReader(reader);
         String line;
         int i = 0;
+
         while ((line = buffer.readLine()) != null){
-            dic[i] = line;
-            i++;
+            if(line.length() > 3){
+                dic[i] = line;
+                i++;
+            }
+
         }
+
         return dic;
     }
 
@@ -46,7 +51,7 @@ public class FiltreAntiSpam {
         while ((line = buffer.readLine()) != null){
             for (int i = 0; i < TAILLE_DICO; i++){
                 if(x[i] == 0){
-                    if(line.toUpperCase().contains(dico[i])){
+                    if(line.toUpperCase().contains(dico[i]) && dico[i].length() > 3){
                         x[i] = 1;
                     }
                 }
@@ -57,7 +62,7 @@ public class FiltreAntiSpam {
     }
 
     public static void main(String args[]) {
-        if (args.length >= 2) {
+        if (args.length >= 2){
             try {
                 String[] dic = charger_dictionnaire();
                 int[] x;
@@ -70,8 +75,6 @@ public class FiltreAntiSpam {
                     bSpam[i] = 0;
                     bHam[i] = 0;
                 }
-                //String[] nomsSpams = new String[mSpam];
-                //String[] nomsHams = new String[mHam];
                 File dossierSpams = new File("./baseapp/spam");
                 File dossierHams = new File("./baseapp/ham");
                 File[] listeSpams = dossierSpams.listFiles();
