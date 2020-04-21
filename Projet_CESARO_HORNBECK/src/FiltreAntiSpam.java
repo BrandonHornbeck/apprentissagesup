@@ -62,7 +62,7 @@ public class FiltreAntiSpam {
     }
 
     public static void main(String args[]) {
-        if (args.length >= 2){
+        if (args.length >= 4){
             try {
                 String[] dic = charger_dictionnaire();
                 int[] x;
@@ -71,10 +71,11 @@ public class FiltreAntiSpam {
                 int mHam = Integer.parseInt(args[1]);
                 double[] bSpam = new double[TAILLE_DICO];
                 double[] bHam = new double[TAILLE_DICO];
-                for (int i = 0; i < TAILLE_DICO; i++) {
+                for (int i = 0; i < TAILLE_DICO; i++){
                     bSpam[i] = 0;
                     bHam[i] = 0;
                 }
+                //apprentissage
                 File dossierSpams = new File("./baseapp/spam");
                 File dossierHams = new File("./baseapp/ham");
                 File[] listeSpams = dossierSpams.listFiles();
@@ -96,11 +97,100 @@ public class FiltreAntiSpam {
                     }
                 }
                 for (int i = 0; i < TAILLE_DICO; i++) {
-                    bSpam[i] = bSpam[i] / mSpam;
+                    bSpam[i] = bSpam[i] / mSpam; //calcul final des bSpam et bHam
                     bHam[i] = bHam[i] / mHam;
                     System.out.println(bSpam[i]);
                     System.out.println(bHam[i]);
                 }
+
+                mSpam = Integer.parseInt(args[2]);
+                mHam = Integer.parseInt(args[3]);
+
+                dossierSpams = new File("./basetest/spam");
+                dossierHams = new File("./basetest/ham");
+                listeSpams = dossierSpams.listFiles();
+                listeHams = dossierHams.listFiles();
+                double pSpam = ((double)mSpam) / (mSpam + mHam); //P(Y = SPAM)
+                double pHam = 1 - pSpam; //P(Y=HAM)
+
+                int nbErreursSpams = 0;
+                int nbErreursHams = 0;
+                for (int i = 0; i < mSpam; i++) {
+                    if (listeSpams[i].isFile()) {
+                        double pPosterioriSpam = 1, pPosterioriHam = 1 ; // proba a posteriori
+                        x = lire_message(dic, "./basetest/spam/" + listeSpams[i].getName());
+                        //produit des (bjSpam ^ xj)(1-bjSpam ^ 1-xj)
+                        for (int j = 0; j < TAILLE_DICO; j++) {
+                            //le calcul suivant équivaut a
+                            double bj = 1 - bSpam[j] ;
+                            if(x[j] > 0) bj = bSpam[j];
+
+
+                            pPosterioriSpam *= bj; // pour la formule a posteriori
+
+                            bj = 1 - bHam[j];
+                            if(x[j] > 0) bj = bHam[j];
+                            pPosterioriHam *= bj; //pour la formule de proba a posteriori
+
+                        }
+
+                        //normalement il faudrai diviser les 2 probabilités ci dessous par p(X=x), mais comme on souhaite seulement les comparer on a pas besoin de ce facteur commun
+                        pPosterioriSpam *= pSpam;
+                        pPosterioriHam *= pHam;
+
+                        System.out.println("Spam numéro "+i+" : P(Y = SPAM | X=x) = "+ pPosterioriSpam + ", P(Y=HAM| X = x) ) "+ pPosterioriHam);
+                        if (pPosterioriSpam > pPosterioriHam){
+                            System.out.println("-----> identifié comme SPAM");
+                        } else{
+                            nbErreursSpams++;
+                            System.out.println("-----> identifié comme HAM     ******erreur******");
+                        }
+
+                    }
+                }
+                for (int i = 0; i < mSpam; i++) {
+                    if (listeHams[i].isFile()) {
+                        double pPosterioriSpam = 1, pPosterioriHam = 1 ; // proba a posteriori
+                        x = lire_message(dic, "./basetest/ham/" + listeSpams[i].getName());
+                        //produit des (bjSpam ^ xj)(1-bjSpam ^ 1-xj)
+                        for (int j = 0; j < TAILLE_DICO; j++) {
+                            //le calcul suivant équivaut a
+                            double bj = 1 - bSpam[j] ;
+                            if(x[j] > 0) bj = bSpam[j];
+
+
+                            pPosterioriSpam *= bj; // pour la formule a posteriori
+
+                            bj = 1 - bHam[j];
+
+                            if(x[j] > 0) bj = bHam[j];
+                            pPosterioriHam *= bj; //pour la formule de proba a posteriori
+
+
+                        }
+
+                        //normalement il faudrai diviser les 2 probabilités ci dessous par p(X=x), mais comme on souhaite seulement les comparer on a pas besoin de ce facteur commun
+                        pPosterioriSpam *= pSpam;
+                        pPosterioriHam *= pHam;
+
+                        System.out.println("Spam numéro "+i+" : P(Y = SPAM | X=x) = "+ pPosterioriSpam + ", P(Y=HAM| X = x) ) "+ pPosterioriHam);
+                        if (pPosterioriSpam > pPosterioriHam){
+                            System.out.println("-----> identifié comme SPAM     ******erreur******");
+                            nbErreursHams++;
+                        } else{
+
+                            System.out.println("-----> identifié comme HAM");
+                        }
+
+                    }
+                }
+
+                System.out.println("pourcentage d'erreur SPAM: "+((double)nbErreursSpams/mSpam)*100);
+                System.out.println("pourcentage d'erreur HAM: "+((double)nbErreursHams/mHam)*100);
+                //test
+
+
+
 
 
             } catch (IOException e) {
