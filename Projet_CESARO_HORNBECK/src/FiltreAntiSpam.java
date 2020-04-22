@@ -102,7 +102,8 @@ public class FiltreAntiSpam {
                     System.out.println(bSpam[i]);
                     System.out.println(bHam[i]);
                 }
-
+                //tests
+                //on récupère les m'
                 mSpam = Integer.parseInt(args[2]);
                 mHam = Integer.parseInt(args[3]);
 
@@ -148,7 +149,7 @@ public class FiltreAntiSpam {
 
                     }
                 }
-                for (int i = 0; i < mSpam; i++) {
+                for (int i = 0; i < mHam; i++) {
                     if (listeHams[i].isFile()) {
                         double pPosterioriSpam = 1, pPosterioriHam = 1 ; // proba a posteriori
                         x = lire_message(dic, "./basetest/ham/" + listeSpams[i].getName());
@@ -187,7 +188,7 @@ public class FiltreAntiSpam {
 
                 System.out.println("pourcentage d'erreur SPAM: "+((double)nbErreursSpams/mSpam)*100);
                 System.out.println("pourcentage d'erreur HAM: "+((double)nbErreursHams/mHam)*100);
-                //test
+
 
 
 
