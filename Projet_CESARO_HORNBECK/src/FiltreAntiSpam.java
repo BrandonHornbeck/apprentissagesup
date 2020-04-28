@@ -11,9 +11,9 @@ public class FiltreAntiSpam {
      * @return le dictionnaire
      * @throws IOException
      */
-    public static String[] charger_dictionnaire() throws IOException {
+    public static String[] charger_dictionnaire(String path) throws IOException {
         String[] dic = new String[TAILLE_DICO];
-        InputStream flux = new FileInputStream("./dictionnaire1000en.txt");
+        InputStream flux = new FileInputStream(path);
         InputStreamReader reader = new InputStreamReader(flux);
         BufferedReader buffer = new BufferedReader(reader);
         String line;
@@ -65,11 +65,11 @@ public class FiltreAntiSpam {
         if (args.length >= 4){
             try {
                 int epsilon = 1;
-                String[] dic = charger_dictionnaire();
+                String[] dic = charger_dictionnaire(args[0]);
                 int[] x;
 
-                int mSpam = Integer.parseInt(args[1]);
-                int mHam = Integer.parseInt(args[2]);
+                int mSpam = Integer.parseInt(args[3]);
+                int mHam = Integer.parseInt(args[4]);
                 double[] bSpam = new double[TAILLE_DICO];
                 double[] bHam = new double[TAILLE_DICO];
                 for (int i = 0; i < TAILLE_DICO; i++){
@@ -77,14 +77,14 @@ public class FiltreAntiSpam {
                     bHam[i] = 0;
                 }
                 //apprentissage
-                File dossierSpams = new File("./baseapp/spam");
-                File dossierHams = new File("./baseapp/ham");
+                File dossierSpams = new File(args[1]+"/spam");
+                File dossierHams = new File(args[1]+"/ham");
                 File[] listeSpams = dossierSpams.listFiles();
                 File[] listeHams = dossierHams.listFiles();
                 System.out.println(".....Apprentissage.....");
                 for (int i = 0; i < mSpam; i++) {
                     if (listeSpams[i].isFile()) {
-                        x = lire_message(dic, "./baseapp/spam/" + listeSpams[i].getName());
+                        x = lire_message(dic, args[1]+"/spam/" + listeSpams[i].getName());
                         for (int j = 0; j < TAILLE_DICO; j++) {
                             bSpam[j] += x[j];
                         }
@@ -92,7 +92,7 @@ public class FiltreAntiSpam {
                 }
                 for (int i = 0; i < mHam; i++) {
                     if (listeHams[i].isFile()) {
-                        x = lire_message(dic, "./baseapp/ham/" + listeHams[i].getName());
+                        x = lire_message(dic, args[1]+"/ham/" + listeHams[i].getName());
                         for (int j = 0; j < TAILLE_DICO; j++) {
                             bHam[j] += x[j];
                         }
@@ -105,11 +105,11 @@ public class FiltreAntiSpam {
                 }
                 //tests
                 //on récupère les m'
-                mSpam = Integer.parseInt(args[3]);
-                mHam = Integer.parseInt(args[4]);
+                mSpam = Integer.parseInt(args[5]);
+                mHam = Integer.parseInt(args[6]);
 
-                dossierSpams = new File(args[0]+"/spam");
-                dossierHams = new File(args[0]+"/ham");
+                dossierSpams = new File(args[2]+"/spam");
+                dossierHams = new File(args[2]+"/ham");
                 listeSpams = dossierSpams.listFiles();
                 listeHams = dossierHams.listFiles();
                 double pSpam = ((double)mSpam) / (mSpam + mHam); //P(Y = SPAM)
@@ -122,7 +122,7 @@ public class FiltreAntiSpam {
                         double pPosterioriSpam = 1, pPosterioriHam = 1 ; // proba a posteriori
                         double produitSPam = 1, produitHam = 1; //produit des (bjSpam ^ xj)(1-bjSpam ^ 1-xj)
 
-                        x = lire_message(dic, args[0]+"/spam/" + listeSpams[i].getName());
+                        x = lire_message(dic, args[2]+"/spam/" + listeSpams[i].getName());
                         //produit des (bjSpam ^ xj)(1-bjSpam ^ 1-xj)
                         for (int j = 0; j < TAILLE_DICO; j++) {
                             //le calcul suivant équivaut a
@@ -157,7 +157,7 @@ public class FiltreAntiSpam {
                         double pPosterioriSpam = 1, pPosterioriHam = 1 ; // proba a posteriori
                         double produitSPam = 1, produitHam = 1; //produit des (bjSpam ^ xj)(1-bjSpam ^ 1-xj)
 
-                        x = lire_message(dic, args[0]+"/ham/" + listeHams[i].getName());
+                        x = lire_message(dic, args[2]+"/ham/" + listeHams[i].getName());
                         //produit des (bjSpam ^ xj)(1-bjSpam ^ 1-xj)
                         for (int j = 0; j < TAILLE_DICO; j++) {
                             //le calcul suivant équivaut a
