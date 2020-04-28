@@ -81,6 +81,7 @@ public class FiltreAntiSpam {
                 File dossierHams = new File("./baseapp/ham");
                 File[] listeSpams = dossierSpams.listFiles();
                 File[] listeHams = dossierHams.listFiles();
+                System.out.println(".....Apprentissage.....");
                 for (int i = 0; i < mSpam; i++) {
                     if (listeSpams[i].isFile()) {
                         x = lire_message(dic, "./baseapp/spam/" + listeSpams[i].getName());
